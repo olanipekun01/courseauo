@@ -1173,4 +1173,10 @@ def studentGradeUpdate(request):
             courseGrade = request.POST["course_grade"]
 
             register = Registration.objects.all().filter(id=registrationIdInput).first()
-            
+            register.grade = courseGrade
+            register.save()
+
+            messages.info(request, f'{register.course.title} grade updated!')
+            requests.post('http://127.0.0.1:8000/target-endpoint/', data=data)
+            redirect(f"/instructor/student/management/")
+    return render(request, 'admin/student_dashboard.html')

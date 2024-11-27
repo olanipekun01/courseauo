@@ -158,6 +158,7 @@ class Registration(models.Model):
     GRADE_TYPE_CHOICES = (
         ('passed', 'passed'),
         ('failed', 'failed'),
+        ('pending', 'pending'),
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -169,26 +170,35 @@ class Registration(models.Model):
     passed = models.BooleanField(default=False)
     carried_over = models.BooleanField(default=False)
     grade = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
-    grade_type = models.CharField(max_length=20, choices=GRADE_TYPE_CHOICES, null=True, default=None)
+    grade_type = models.CharField(max_length=5, null=True, default=None)
+    grade_remark = models.CharField(max_length=20, choices=GRADE_TYPE_CHOICES, null=True, default=None)
 
     def __str__(self):
         return f"{self.student.surname} - {self.registration_date}"
 
     def save(self, *args, **kwargs):
         # Automatically update grade_type based on the grade
-        if self.grade is not None:
-            if self.grade >= 70:
+        if int(self.grade) is not None:
+            if int(self.grade) >= 70:
                 self.grade_type = 'A'
-            elif self.grade >= 60:
+            elif int(self.grade) >= 60:
                 self.grade_type = 'B'
-            elif self.grade >= 50:
+            elif int(self.grade) >= 50:
                 self.grade_type = 'C'
-            elif self.grade >= 45:
+            elif int(self.grade) >= 45:
                 self.grade_type = 'D'
-            elif self.grade >= 40:
+            elif int(self.grade) >= 40:
                 self.grade_type = 'E'
             else:
                 self.grade_type = 'F'
+
+            # Update grade_remark based on whether the grade is a pass or fail
+            if int(self.grade) >= 40:  # Assuming 40 is the passing grade
+                self.grade_remark = 'passed'
+            elif int(self.grade) <= 0:
+                self.grade_remark = 'pending'
+            else:
+                self.grade_remark = 'failed'
         
         # Call the original save method
         super().save(*args, **kwargs)
