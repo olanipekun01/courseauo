@@ -1159,3 +1159,18 @@ def registeredStudentManagementDashboard(request):
             messages.info(request, f'Field cannot be empty!')
             redirect(f"/instructor/student/management/")
     return render(request, 'admin/student_dashboard.html', {"department": instructor.department, 'curr_sess': current_session})
+
+
+
+@login_required
+@user_passes_test(is_instructor, login_url='/404')
+def studentGradeUpdate(request):
+    if request.user.is_authenticated:
+        user = request.user
+        instructor = get_object_or_404(Instructor, user=user)
+        if request.method == "POST":
+            registrationIdInput = request.POST["registrationIdInput"].strip()
+            courseGrade = request.POST["course_grade"]
+
+            register = Registration.objects.all().filter(id=registrationIdInput).first()
+            

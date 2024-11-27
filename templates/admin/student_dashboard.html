@@ -397,11 +397,11 @@
                                             <p class="mt-3 text-[10px]"><span class="text-12px font-bold">Title: </span>{{data.registration.course.title}}</p>
                                             
                                             <div class="mt-3 flex flex-row justify-between items-center">
-                                                <button onclick="handleGrade('{{data.registration.id}}', '{{bch201}}')"><img class="w-[15px]" src="{% static './assets/bx-edit.svg' %}" alt=""></button>
+                                                <button onclick="handleGradeUpdateModal('{{data.registration.id}}', '{{data.registration.course.title}}', '{{data.registration.course.courseCode}}')"><img class="w-[15px]" src="{% static './assets/bx-edit.svg' %}" alt=""></button>
 
                                                 <div class="flex flex-row gap-3">
                                                     <div class="text-[12px]"><span class="font-bold">Grade:</span> <i class="">00</i></div>
-                                                    <span class="text-[12px] font-bold">A</span>
+                                                    <span class="text-[12px] font-bold">{{data.registration.grade_type}}</span>
                                                 </div>
                                             </div>
 
@@ -442,11 +442,11 @@
                                             <p class="mt-3 text-[10px]"><span class="text-12px font-bold">Title: </span>{{data.registration.course.title}}</p>
                                             
                                             <div class="mt-3 flex flex-row justify-between items-center">
-                                                <button onclick="handleGrade('/grade/id:0292929', 'bch201')"><img class="w-[15px]" src="{% static './assets/bx-edit.svg' %}" alt=""></button>
+                                                <button onclick="handleGradeUpdateModal('{{data.registration.id}}', '{{data.registration.course.title}}', '{{data.registration.course.courseCode}}')"><img class="w-[15px]" src="{% static './assets/bx-edit.svg' %}" alt=""></button>
 
                                                 <div class="flex flex-row gap-3">
                                                     <div class="text-[12px]"><span class="font-bold">Grade:</span> <i class="">00</i></div>
-                                                    <span class="text-[12px] font-bold">A</span>
+                                                    <span class="text-[12px] font-bold">{{data.registration.grade_type}}</span>
                                                 </div>
                                             </div>
 
@@ -560,17 +560,25 @@
 
 
     <div class="update_grade">
-        <form method="post" action="/grade/programme/">
-          <!-- {% csrf_token %} -->
+        <form method="post" action="/instructor/student/grade/">
+          {% csrf_token %}
 
           <h4 class="mb-8 text-[23px] ml-2 text-red-700">Input Grade</h1>
 
             <div class="flex flex-row gap-3 mb-4 mt-3">
                 <span class="font-bold">Course Code:</span>
-                <span class="">BCH 201</span>
+                <span id="gradeCode" class="">BCH 201</span>
             </div>
+
+            <div class="flex flex-row gap-3 mb-4 mt-3">
+                <span class="font-bold">Course Title:</span>
+                <span id="gradeTitle" class="">Biochemistry</span>
+            </div>
+
+            <input type="text" hidden id="registrationIdInput" name="registrationIdInput" value="">
          
-          <input type="number"  value="4" name="course_grade" placeholder="duration" />
+          <!-- <input type="number"  value="4" name="course_grade" placeholder="duration" /> -->
+          <input type="number" min="0" max="100" step=".01" value="0" name="course_grade" placeholder="grade" />
          
   
           
@@ -599,7 +607,7 @@
         </div>
       </div>
 
-    <script src="{% static './admin_script.js' %}" type="text/javascript">
+    <script src="{% static './js/admin_script.js' %}" type="text/javascript">
         
 
     </script>

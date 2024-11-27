@@ -38,7 +38,8 @@ urlpatterns = [
     path('instructor/courses/each/<str:id>/', views.eachCourse, name='instructor_each_course'),
 
     path('instructor/student/search/', views.registeredStudentSearchDashboard, name='instructor_student_search'),
-     path('instructor/student/management/', views.registeredStudentManagementDashboard, name='instructor_student_management'),
+    path('instructor/student/management/', views.registeredStudentManagementDashboard, name='instructor_student_management'),
+    path('instructor/student/grade/', views.studentGradeUpdate, name='instructor_student_grade_update'),
 
     path('404', views.F404, name='f404')
 ] 

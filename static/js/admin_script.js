@@ -169,3 +169,20 @@ let btn = document.querySelector('#btn');
             document.querySelector(".update_programme").style.display = "none";
             document.querySelector(".background_wrapper").style.display = "none";
         }
+
+
+        function closeUpdateGradeModal() {
+            event.preventDefault();
+            document.querySelector(".update_grade").style.display = "none";
+            document.querySelector(".background_wrapper").style.display = "none";
+        }
+
+        
+        function handleGradeUpdateModal(id, title, code) {
+            document.querySelector(".update_grade").style.display = "block";
+            document.querySelector(".background_wrapper").style.display = "block";
+            document.querySelector('#registrationIdInput').value = id;
+            document.querySelector('#gradeCode').innerHTML = code;
+            document.querySelector('#gradeTitle').innerHTML = title;
+            
+        }

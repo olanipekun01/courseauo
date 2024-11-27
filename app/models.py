@@ -161,23 +161,39 @@ class Registration(models.Model):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE,  null=True, default=None)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE,  null=True, default=None)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, default=None)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, default=None)
     session = models.ForeignKey(Session, on_delete=models.CASCADE, null=True, default=None)
-    semester = models.ForeignKey(Semester, on_delete=models.CASCADE,  null=True, default=None)
+    semester = models.ForeignKey(Semester, on_delete=models.CASCADE, null=True, default=None)
     registration_date = models.DateField(auto_now_add=True)
     passed = models.BooleanField(default=False)
     carried_over = models.BooleanField(default=False)
     grade = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
     grade_type = models.CharField(max_length=20, choices=GRADE_TYPE_CHOICES, null=True, default=None)
 
-    # approved = models.BooleanField(blank = True, null=True)
-    # approved_by = models.ForeignKey(Instructor, on_delete=models.CASCADE)
-    # date_approved = models.DateField(blank=True, null=True)
-
     def __str__(self):
         return f"{self.student.surname} - {self.registration_date}"
 
+    def save(self, *args, **kwargs):
+        # Automatically update grade_type based on the grade
+        if self.grade is not None:
+            if self.grade >= 70:
+                self.grade_type = 'A'
+            elif self.grade >= 60:
+                self.grade_type = 'B'
+            elif self.grade >= 50:
+                self.grade_type = 'C'
+            elif self.grade >= 45:
+                self.grade_type = 'D'
+            elif self.grade >= 40:
+                self.grade_type = 'E'
+            else:
+                self.grade_type = 'F'
+        
+        # Call the original save method
+        super().save(*args, **kwargs)
+
+        
 class confirmRegister(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student = models.ForeignKey(Student, on_delete=models.CASCADE,  null=True, default=None)
