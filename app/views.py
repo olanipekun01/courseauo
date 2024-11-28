@@ -61,6 +61,17 @@ current_academic_session = "2025/2026"
 current_academic_semester = "second"
 
 
+
+
+def set_current_session(session_id):
+    # Set all sessions to not current
+    Session.objects.all().update(is_current=False)
+    # Set the specified session as current
+    session = Session.objects.get(id=session_id)
+    session.is_current = True
+    session.save()
+
+
 # Helper functions for role checks
 def is_student(user):
     # print("User", User.role)
@@ -1082,14 +1093,6 @@ def F404(request):
     return render(request, "admin/404.html")
 
 
-def set_current_session(session_id):
-    # Set all sessions to not current
-    Session.objects.all().update(is_current=False)
-    # Set the specified session as current
-    session = Session.objects.get(id=session_id)
-    session.is_current = True
-    session.save()
-
 @login_required
 @user_passes_test(is_instructor, login_url='/404')
 def registeredStudentManagementDashboard(request):
@@ -1097,64 +1100,66 @@ def registeredStudentManagementDashboard(request):
         user = request.user
         instructor = get_object_or_404(Instructor, user=user)
         current_session = Session.objects.filter(is_current=True).first()
+        current_semester = Semester.objects.filter(is_current=True).first()
         if request.method == "POST":
             matricNo = request.POST["matricNo"].strip()
             if matricNo != "":
-                # try:
-                student = Student.objects.all().filter(Q(matricNumber=matricNo) | Q(jambNumber=matricNo), department=instructor.department).first()
-                print('students here', student)
-                if student:
+                try:
+                    student = Student.objects.all().filter(Q(matricNumber=matricNo) | Q(jambNumber=matricNo), department=instructor.department).first()
                     
-                    enrollment = Enrollment.objects.filter(student=student).order_by('enrolled_date').first()
-                    
-                    if not enrollment:
-                        # Handle case where the student has no enrollment record
-                        messages.info(request, f'No enrollment found!')
-                        redirect(f"/instructor/student/management/")
+                    if student:
                         
-                    enrollment_year = int(enrollment.session.year.split('/')[0])
-                    
-                    # Query all registrations for the student and annotate each session with the calculated level
-                    registrations = Registration.objects.filter(student=student).select_related('session')
-                    
-                    # Calculate level for each session
-                    sessions_and_levels = []
-                    for registration in registrations:
-                        session_year = int(registration.session.year.split('/')[0])
-                        # Calculate the difference in years
-                        years_since_enrollment = session_year - enrollment_year
-                        # Calculate the level, assuming the student starts at Level 100 and progresses yearly
-                        current_level = 100 + (years_since_enrollment * 100)
+                        enrollment = Enrollment.objects.filter(student=student).order_by('enrolled_date').first()
                         
-                        sessions_and_levels.append({
-                            'session': registration.session.year,
-                            'level': current_level,
-                            'registration': registration,  # Add any course details if necessary
-                        })
+                        if not enrollment:
+                            # Handle case where the student has no enrollment record
+                            messages.info(request, f'No enrollment found!')
+                            redirect(f"/instructor/student/management/")
+                            
+                        enrollment_year = int(enrollment.session.year.split('/')[0])
+                        
+                        # Query all registrations for the student and annotate each session with the calculated level
+                        registrations = Registration.objects.filter(student=student).select_related('session')
+                        
+                        # Calculate level for each session
+                        sessions_and_levels = []
+                        for registration in registrations:
+                            session_year = int(registration.session.year.split('/')[0])
+                            # Calculate the difference in years
+                            years_since_enrollment = session_year - enrollment_year
+                            # Calculate the level, assuming the student starts at Level 100 and progresses yearly
+                            current_level = 100 + (years_since_enrollment * 100)
+                            
+                            sessions_and_levels.append({
+                                'session': registration.session.year,
+                                'level': current_level,
+                                'registration': registration,  # Add any course details if necessary
+                            })
 
-                    unique_sessions = sorted({entry['session'] for entry in sessions_and_levels})
-                    
-                    
+                        unique_sessions = sorted({entry['session'] for entry in sessions_and_levels})
+                        
+                        
 
-                    unique_levels = sorted({entry['level'] for entry in sessions_and_levels})
+                        unique_levels = sorted({entry['level'] for entry in sessions_and_levels})
 
-                    print('sessions_and_levels', sessions_and_levels )
+                        courses = Course.objects.all()
 
-                    duration = 0
-                    if len(unique_levels) == len(unique_sessions):
-                        duration = len(unique_levels)
-                    
-                    context = {
-                        'student': student,
-                        'sessions_and_levels': sessions_and_levels,
-                    }
+                        duration = 0
+                        if len(unique_levels) == len(unique_sessions):
+                            duration = len(unique_levels)
+                        
 
-                    
-                    return render(request, 'admin/student_dashboard.html', {"department": instructor.department, 'curr_sess': current_session, 'student': student,
-                        'sessions_and_levels': sessions_and_levels, 'unique_sessions': unique_sessions, 'unique_levels': unique_levels, 'duration':duration})
-                # except:
-                #     messages.info(request, f'Student not available')
-                #     return redirect(f"/instructor/student/management/")
+                        context = {
+                            'student': student,
+                            'sessions_and_levels': sessions_and_levels,
+                        }
+
+                        
+                        return render(request, 'admin/student_dashboard.html', {"department": instructor.department, 'curr_sess': current_session, 'curr_semes': current_semester, 'student': student,
+                            'sessions_and_levels': sessions_and_levels, 'unique_sessions': unique_sessions, 'unique_levels': unique_levels, 'duration':duration, 'courses': courses, 'matricNo': matricNo})
+                except:
+                    messages.info(request, f'Student not available')
+                    return redirect(f"/instructor/student/management/")
 
             messages.info(request, f'Field cannot be empty!')
             redirect(f"/instructor/student/management/")
@@ -1180,3 +1185,50 @@ def studentGradeUpdate(request):
             requests.post('http://127.0.0.1:8000/target-endpoint/', data=data)
             redirect(f"/instructor/student/management/")
     return render(request, 'admin/student_dashboard.html')
+
+@login_required
+@user_passes_test(is_instructor, login_url='/404')
+def deleteStudentRegisteredCourse(request, id):
+
+    try:
+        regObjects = Registration.objects.filter(id=id)[0]
+        print("1", regObjects.course.title)
+        if Registration.objects.all().filter(id=id).exists():
+            messages.info(request, f'{regObjects.course.title} deleted successfully')
+            regObjects= Registration.objects.filter(id=id).delete()
+            
+            return redirect("/instructor/student/management/")
+        messages.info(request, f'Registered Course not available')
+        return redirect("/instructor/student/management/")
+    except:
+        messages.info(request, f'Registered Course not available')
+        return redirect("/instructor/student/management/")
+
+@login_required
+@user_passes_test(is_instructor, login_url='/404')
+def addCourseStudentRegisteredCourse(request, matricNo):
+    if request.user.is_authenticated:
+        user = request.user
+        instructor = get_object_or_404(Instructor, user=user)
+        try:
+            student = Student.objects.all().filter(Q(matricNumber=matricNo) | Q(jambNumber=matricNo), department=instructor.department).first()
+            if student:
+                courseId = request.GET['course']
+                curr_semester = request.GET['curr_semester']
+                curr_session = request.GET['curr_session']
+
+                course_exist = Registration.objects.create(
+                    student=student,
+                    course=get_object_or_404(Course, id=courseId),
+                    session=get_object_or_404(Session, year=curr_session),
+                    semester=get_object_or_404(Semester, name=curr_semester),
+                )
+                course_exist.save()
+                messages.info(request, f'Course Updated')
+                return redirect("/instructor/student/management/")
+            messages.info(request, f'Student does not exist')
+            return redirect("/instructor/student/management/")
+        except:
+            messages.info(request, f'Something went wrong')
+            return redirect("/instructor/student/management/")
+    

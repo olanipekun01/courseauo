@@ -407,7 +407,7 @@
 
                                             <div class="flex justify-between mt-4 text-[11px] font-bold">
                                                 
-                                                <button class="text-red-700" onclick="handleDeletePopOut('/delete/id:0292929', 'biochemistry')">Delete</button>
+                                                <button class="text-red-700" onclick="handleDeletePopOut('/instructor/student/management/reg/delete/{{data.registration.id}}', '{{data.registration.course.title}}')">Delete</button>
                                                 <span class="">{{data.registration.course.unit}}</span>
                                             </div>
                                         </div>
@@ -496,23 +496,25 @@
 
 
     <div class="create_programme">
-        <form method="post" action="/admin/programme/">
+        <form method="get" action="/instructor/student/management/reg/add/{{matricNo}}/">
           <!-- {% csrf_token %} -->
 
           <h4 class="mb-8 text-[23px] ml-5 text-red-700">ADD Course</h1>
-          <select name="courses" id="">
-            <option value="bch201">Bch201</option>
-          </select>          
+          <select name="course" id="">
+            {% for course in courses %}
+                <option value="{{course.id}}">{{course.courseCode}}</option>
+            {% endfor %}
+          </select>
 
           
 
 
-          <select name="level" id="">
-            <option value="2024/2025" class="">2024/2025</option>
+          <select name="curr_session" id="">
+            <option value="{{curr_sess}}" class="">{{curr_sess}}</option>
           </select>
 
-          <select name="semester" id="">
-            <option value="second" class="">Second Semester</option>
+          <select name="curr_semester" id="">
+            <option value="{{curr_semes}}" class="">{{curr_semes}} Semester</option>
           </select>
          
   

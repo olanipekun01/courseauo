@@ -35,6 +35,12 @@ class Session(models.Model):
     year = models.CharField(max_length=9)  # e.g., '2023/2024'
     is_current = models.BooleanField(default=False)  # Marks current active session
 
+    def save(self, *args, **kwargs):
+        if self.is_current:
+            # Uncheck `is_current` for all other Semester objects
+            Session.objects.filter(is_current=True).exclude(id=self.id).update(is_current=False)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.year
     
@@ -122,7 +128,14 @@ class Level(models.Model):
 class Semester(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(blank=True, null=True, max_length=80)
+    is_current = models.BooleanField(default=False) 
     
+    def save(self, *args, **kwargs):
+        if self.is_current:
+            # Uncheck `is_current` for all other Semester objects
+            Semester.objects.filter(is_current=True).exclude(id=self.id).update(is_current=False)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
     
