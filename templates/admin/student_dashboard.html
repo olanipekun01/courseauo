@@ -392,7 +392,7 @@
                                             <div class="flex flex-row justify-between">
                                                 <h5 class="font-bold text-[15px]">{{data.registration.course.courseCode}}</h5>
 
-                                                <span class="text-[#077105] font-bold">{{dataregistration.course.status}}</span>
+                                                <span class="text-[#077105] font-bold">{{data.registration.course.status}}</span>
                                             </div>
                                             <p class="mt-3 text-[10px]"><span class="text-12px font-bold">Title: </span>{{data.registration.course.title}}</p>
                                             
@@ -409,6 +409,19 @@
                                                 
                                                 <button class="text-red-700" onclick="handleDeletePopOut('/instructor/student/management/reg/delete/{{data.registration.id}}', '{{data.registration.course.title}}')">Delete</button>
                                                 <span class="">{{data.registration.course.unit}}</span>
+                                            </div>
+
+                                            <div class="flex justify-between mt-4 text-[11px] font-bold">
+                                                <span class="">Course Status (level)</span>
+                                                <span class="">{{courseStatusLevel}}</span>
+                                            </div>
+
+                                            <div class="flex justify-between mt-4 text-[11px] font-bold">
+                                                <button class="rounded-md border-[0.5px] border-[#077105] px-[2px] py-[3px] hover:py-[2px] hover:bg-[#077105] hover:text-[#fff] text-[8px] font-semibold">Approve</button>
+
+                                                <button class="rounded-md border-[0.5px] border-red-700 px-[2px] py-[3px] text-red-700 hover:py-[2px] hover:bg-red-700 hover:text-[#fff] text-[10px] font-semibold">Reject</button>
+
+
                                             </div>
                                         </div>
                                         {% endif %}
@@ -445,14 +458,14 @@
                                                 <button onclick="handleGradeUpdateModal('{{data.registration.id}}', '{{data.registration.course.title}}', '{{data.registration.course.courseCode}}')"><img class="w-[15px]" src="{% static './assets/bx-edit.svg' %}" alt=""></button>
 
                                                 <div class="flex flex-row gap-3">
-                                                    <div class="text-[12px]"><span class="font-bold">Grade:</span> <i class="">00</i></div>
+                                                    <div class="text-[12px]"><span class="font-bold">Grade:</span> <i class="">{{data.registration.grade}}</i></div>
                                                     <span class="text-[12px] font-bold">{{data.registration.grade_type}}</span>
                                                 </div>
                                             </div>
 
                                             <div class="flex justify-between mt-4 text-[11px] font-bold">
                                                 
-                                                <button class="text-red-700" onclick="handleDeletePopOut('/delete/id:0292929', 'biochemistry')">Delete</button>
+                                                <button class="text-red-700" onclick="handleDeletePopOut('/instructor/student/management/reg/delete/{{data.registration.id}}', '{{data.registration.course.title}}')">Delete</button>
                                                 <span class="">{{data.registration.course.unit}}</span>
                                             </div>
                                         </div>

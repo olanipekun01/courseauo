@@ -1163,7 +1163,7 @@ def registeredStudentManagementDashboard(request):
 
             messages.info(request, f'Field cannot be empty!')
             redirect(f"/instructor/student/management/")
-    return render(request, 'admin/student_dashboard.html', {"department": instructor.department, 'curr_sess': current_session})
+    return render(request, 'admin/student_dashboard.html', {"department": instructor.department, 'curr_sess': current_session, 'curr_semes': current_semester})
 
 
 
@@ -1215,20 +1215,41 @@ def addCourseStudentRegisteredCourse(request, matricNo):
             if student:
                 courseId = request.GET['course']
                 curr_semester = request.GET['curr_semester']
+                
                 curr_session = request.GET['curr_session']
+                current_session_model = Session.objects.filter(is_current=True).first()
+                current_semester_model = Semester.objects.filter(is_current=True).first()
+                print('semester', curr_semester, current_semester_model , type(curr_semester), type(current_semester_model), curr_semester==current_semester_model)
+                print('session', curr_session, current_session_model , type(curr_session), type(current_session_model), curr_session==current_session_model)
 
-                course_exist = Registration.objects.create(
-                    student=student,
-                    course=get_object_or_404(Course, id=courseId),
-                    session=get_object_or_404(Session, year=curr_session),
-                    semester=get_object_or_404(Semester, name=curr_semester),
-                )
-                course_exist.save()
-                messages.info(request, f'Course Updated')
+                if curr_session == current_session_model.year and curr_semester == current_semester_model.name:
+                    course = get_object_or_404(Course, id=courseId)
+
+                    if course.semester.name != current_semester_model.name:
+                        messages.info(request, f'Invalid course to enter')
+                        return redirect("/instructor/student/management/")
+                    
+                    if Registration.objects.all().filter(student=student, 
+                                                    course=get_object_or_404(Course, id=courseId), 
+                                                    session=get_object_or_404(Session, year=curr_session),
+                                                    semester=get_object_or_404(Semester, name=curr_semester)).exists():
+                        messages.info(request, f'Already registered')
+                        return redirect("/instructor/student/management/")
+
+                    course_exist = Registration.objects.create(
+                        student=student,
+                        course=get_object_or_404(Course, id=courseId),
+                        session=get_object_or_404(Session, year=curr_session),
+                        semester=get_object_or_404(Semester, name=curr_semester),
+                    )
+                    course_exist.save()
+                    messages.info(request, f'Course Updated')
+                    return redirect("/instructor/student/management/")
+                messages.info(request, f'Something went wrong!!')
                 return redirect("/instructor/student/management/")
             messages.info(request, f'Student does not exist')
             return redirect("/instructor/student/management/")
         except:
             messages.info(request, f'Something went wrong')
             return redirect("/instructor/student/management/")
-    
+            

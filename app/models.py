@@ -168,7 +168,7 @@ class Instructor(models.Model):
         return self.name
 
 class Registration(models.Model):
-    GRADE_TYPE_CHOICES = (
+    GRADE_REMARK_CHOICES = (
         ('passed', 'passed'),
         ('failed', 'failed'),
         ('pending', 'pending'),
@@ -182,9 +182,9 @@ class Registration(models.Model):
     registration_date = models.DateField(auto_now_add=True)
     passed = models.BooleanField(default=False)
     carried_over = models.BooleanField(default=False)
-    grade = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
-    grade_type = models.CharField(max_length=5, null=True, default=None)
-    grade_remark = models.CharField(max_length=20, choices=GRADE_TYPE_CHOICES, null=True, default=None)
+    grade = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=0)
+    grade_type = models.CharField(max_length=5, null=True, default='...')
+    grade_remark = models.CharField(max_length=20, choices=GRADE_REMARK_CHOICES, null=True, default='pending')
 
     def __str__(self):
         return f"{self.student.surname} - {self.registration_date}"
