@@ -174,6 +174,12 @@ class Registration(models.Model):
         ('pending', 'pending'),
     )
 
+    INSTRUCTOR_REMARK_CHOICES = (
+        ('pending', 'pending'),
+        ('approved', 'approved'),
+        ('rejected', 'rejected')
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, default=None)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, default=None)
@@ -185,6 +191,7 @@ class Registration(models.Model):
     grade = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=0)
     grade_type = models.CharField(max_length=5, null=True, default='...')
     grade_remark = models.CharField(max_length=20, choices=GRADE_REMARK_CHOICES, null=True, default='pending')
+    instructor_remark = models.CharField(max_length=20, choices=INSTRUCTOR_REMARK_CHOICES, null=True, default='pending')
 
     def __str__(self):
         return f"{self.student.surname} - {self.registration_date}"
