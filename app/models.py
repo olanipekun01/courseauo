@@ -71,7 +71,6 @@ class Programme(models.Model):
     def __str__(self):
         return self.name
 
-
 class Student(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     otherNames = models.CharField(blank=True, null=True, max_length=80)
